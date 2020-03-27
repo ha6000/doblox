@@ -31,3 +31,5 @@ class Doblox {
 		});
 	};
 };
+
+module.exports = Doblox;
