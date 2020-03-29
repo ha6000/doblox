@@ -42,6 +42,7 @@ class Doblox {
 			var userUrl = new URL(roverUserApiUrl);
 			userUrl.pathname += user.id;
 			fetch(userUrl).then(res => res.json()).then(json => {
+				if (json.errorCode) return reject(json);
 				resolve({
 					name: json.robloxUsername,
 					id: json.robloxId
