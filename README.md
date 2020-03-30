@@ -1,4 +1,4 @@
-![Doblox][.github/img/Doblox.png]
+![Doblox][https://github.com/ha6000/doblox/blob/master/.github/img/Doblox.png]
 # Doblox
 > Open Source module to handle integration between Discord and Roblox
 ***
