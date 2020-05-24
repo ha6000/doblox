@@ -59,22 +59,20 @@ class Doblox {
 	 * @return {Promise<string>}         Returns Promise with the name of the rank
 	 */
 	getRankInGroup(user, groupId) {
-		return new Promise(async (resolve, reject) => {
-			var player;
-			if (typeof user == 'object') {
-				player = user;
-			} else {
-				try {
-					await getRobloxPlayer(user);
-				} catch (error) {
-					reject(error);
-				};
-			};
-		
-			this.noblox.getRankNameInGroup(groupId, player.id).then(name => {
-				resolve(name);
-			}).catch(reject);
-		});
+		return Promise.resolve()
+			.then(() => {
+				let resolvedUser = client.users.resolve(user)
+				if (!resolvedUser) {
+					return this.getRobloxPlayer(user);
+				} else {
+					return resolvedUser;
+				}
+			})
+			.then(player => {
+				this.noblox.getRankNameInGroup(groupId, player.id).then(name => {
+					resolve(name);
+				}).catch(reject);
+			});
 	};
 };
 
