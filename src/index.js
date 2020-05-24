@@ -69,9 +69,7 @@ class Doblox {
 				}
 			})
 			.then(player => {
-				this.noblox.getRankNameInGroup(groupId, player.id).then(name => {
-					resolve(name);
-				}).catch(reject);
+				return this.noblox.getRankNameInGroup(groupId, player.id);
 			});
 	};
 };
