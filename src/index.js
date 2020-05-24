@@ -61,7 +61,7 @@ class Doblox {
 	getRankInGroup(user, groupId) {
 		return Promise.resolve()
 			.then(() => {
-				let resolvedUser = client.users.resolve(user)
+				let resolvedUser = this.client.users.resolve(user)
 				if (!resolvedUser) {
 					return this.getRobloxPlayer(user);
 				} else {
