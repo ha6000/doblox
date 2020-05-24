@@ -62,10 +62,10 @@ class Doblox {
 		return Promise.resolve()
 			.then(() => {
 				let resolvedUser = this.client.users.resolve(user)
-				if (!resolvedUser) {
-					return this.getRobloxPlayer(user);
+				if (resolvedUser) {
+					return this.getRobloxPlayer(resolvedUser);
 				} else {
-					return resolvedUser;
+					return user;
 				}
 			})
 			.then(player => {
