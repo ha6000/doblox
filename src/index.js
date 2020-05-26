@@ -1,77 +1,98 @@
-const fetch = require('node-fetch');
-const roverUserApiUrl = new URL('https://verify.eryn.io/api/user/');
-
-/**
- * Object containing your noblox module
- * @typedef {Object} Noblox
- */
-
-/**
- * A Discord UserResolvable or roblox id
- * @typedef {(Discord.UserResolvable|robloxPlayer)} player
- */
-
-/**
- * A player information Object
- * @typedef {Object} robloxPlayer
- * @property {string} name The name of the roblox player
- * @property {number} id Id of the player
- */
-
-/**
- * Main class for doblox, allowes you interact with most roblox things.
- * @class
- */
-class Doblox {
-	/**
-	 * @param  {Noblox} noblox Noblox module
-	 * @param  {Discord.Client} client Discord.js client
-	 */
-	constructor(noblox, client) {
-		this.noblox = noblox;
-		this.client = client;
-	};
-	/**
-	 * Gets information of a roblox player
-	 * @param  {Discord.UserResolvable} user The Discord user
-	 * @return {robloxPlayer}      The information
-	 */
-	getRobloxPlayer(user) {
-		return new Promise((resolve, reject) => {
-			user = this.client.users.resolve(user);
-			var userUrl = new URL(roverUserApiUrl);
-			userUrl.pathname += user.id;
-			fetch(userUrl).then(res => res.json()).then(json => {
-				if (json.errorCode) return resolve(undefined);
-				resolve({
-					name: json.robloxUsername,
-					id: json.robloxId
-				});
-			}).catch(error => {
-				reject(error);
-			});
-		});
-	};
-	/**
-	 * Gets the rank of a player in a group
-	 * @param  {player} user The player you want the information of
-	 * @param  {string} groupId The group the rank is in
-	 * @return {Promise<string>}         Returns Promise with the name of the rank
-	 */
-	getRankInGroup(user, groupId) {
-		return Promise.resolve()
-			.then(() => {
-				let resolvedUser = this.client.users.resolve(user)
-				if (resolvedUser) {
-					return this.getRobloxPlayer(resolvedUser);
-				} else {
-					return user;
-				}
-			})
-			.then(player => {
-				return this.noblox.getRankNameInGroup(groupId, player.id);
-			});
-	};
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Client = void 0;
+const axios_1 = require("axios");
+const apiRateLimit = 1000;
+const apiEndpoints = {
+    user: 'https://verify.eryn.io/api/user/'
 };
-
-module.exports = Doblox;
+function rateLimit(limit) {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            resolve();
+        }, limit || apiRateLimit);
+    });
+}
+class RobloxUser {
+    constructor(username, id) {
+        this.username = username;
+        this.id = id;
+    }
+}
+/*
+Base client for api actions
+ */
+class Client {
+    /**
+     * @param {noblox}         noblox Your noblox module object
+     * @param {discord.Client} client A discord client
+     */
+    constructor(noblox, client) {
+        this.noblox = noblox;
+        this.client = client;
+        this._RateLimit = Promise.resolve();
+    }
+    RateLimit(limit) {
+        return this._RateLimit = this._RateLimit
+            .then(() => {
+            return rateLimit(limit);
+        });
+    }
+    /**
+     * @param {discord.UserResolvable} user The discord user to get robloxUser of
+     */
+    async getRobloxUser(user) {
+        const resolvedUser = this.client.users.resolve(user);
+        if (!resolvedUser) {
+            return Promise.reject({
+                message: 'Unkown user',
+                errno: 1
+            });
+        }
+        ;
+        const userid = resolvedUser.id;
+        await this.RateLimit();
+        return axios_1.default.get(apiEndpoints.user + userid)
+            .then((response) => {
+            const data = response.data;
+            if (data.status != 'ok') {
+                if (data.retryAfterSeconds) {
+                    return this.RateLimit(data.retryAfterSeconds)
+                        .then(() => {
+                        return this.getRobloxUser(userid);
+                    });
+                }
+                else {
+                    return Promise.reject({
+                        message: 'Non ok status',
+                        errno: 0,
+                        response: data
+                    });
+                }
+            }
+            return new RobloxUser(data.robloxUsername, data.robloxId);
+        });
+    }
+    /**
+     * get a role of a user in a group
+     * @param  {UserResolvable}  player A roblox user or discord user
+     * @param  {string}          group  The group to check in
+     * @return {Promise<string>}        Promise resolving to role name
+     */
+    async getRoleInGroup(player, group) {
+        if (player instanceof RobloxUser) {
+            var user = player;
+        }
+        else {
+            try {
+                var user = await this.getRobloxUser(player);
+            }
+            catch (error) {
+                console.log(error);
+                return error;
+            }
+        }
+        return this.noblox.getRankNameInGroup(group, user.id);
+    }
+}
+exports.Client = Client;
