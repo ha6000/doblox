@@ -19,6 +19,10 @@ class RobloxUser {
         this.id = id;
     }
 }
+/**
+ * A value that resolves to a discord user or roblox user
+ * @typedef {RobloxUser | discord.UserResolvable} UserResolvable
+ */
 /*
 Base client for api actions
  */

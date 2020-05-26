@@ -1,3 +1,18 @@
+## Classes
+
+<dl>
+<dt><a href="#Client">Client</a></dt>
+<dd></dd>
+</dl>
+
+## Typedefs
+
+<dl>
+<dt><a href="#UserResolvable">UserResolvable</a> : <code>RobloxUser</code> | <code>discord.UserResolvable</code></dt>
+<dd><p>A value that resolves to a discord user or roblox user</p>
+</dd>
+</dl>
+
 <a name="Client"></a>
 
 ## Client
@@ -36,6 +51,12 @@ get a role of a user in a group
 
 | Param | Type | Description |
 | --- | --- | --- |
-| player | <code>UserResolvable</code> | A roblox user or discord user |
+| player | [<code>UserResolvable</code>](#UserResolvable) | A roblox user or discord user |
 | group | <code>string</code> | The group to check in |
 
+<a name="UserResolvable"></a>
+
+## UserResolvable : <code>RobloxUser</code> \| <code>discord.UserResolvable</code>
+A value that resolves to a discord user or roblox user
+
+**Kind**: global typedef  
