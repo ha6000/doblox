@@ -3,6 +3,9 @@
 > Open Source module to handle integration between Discord and Roblox
 ***
 
+## New Release
+Both API should be compatible just a lot of improvements and switched TypeScript
+
 ## Installation
 
 ```
