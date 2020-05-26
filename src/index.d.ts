@@ -1,18 +1,25 @@
-import Discord from "discord.js";
-import Noblox from "noblox.js";
+import discord from 'discord.js';
+import noblox from 'noblox.js';
 
-interface robloxPlayer {
-    name: string,
-    id: number
-};
+type noblox = object | any;
 
-type rankName = string;
-type groupId = number;
+type UserResolvable = RobloxUser | discord.UserResolvable;
 
-declare class Doblox {
-    constructor(noblox: Object, client: Discord.Client);
-    getRobloxPlayer(user: Discord.UserResolvable): Promise<robloxPlayer>
-    getRankInGroup(user: Discord.UserResolvable, groupId: groupId): Promise<rankName>
-};
+class RobloxUser {
+	username: string;
+	id: string
+	constructor(username: string, id: string) {
+		this.username = username;
+		this.id = id;
+	}
+}
 
-export default Doblox;
+class Client {
+	noblox: noblox;
+	client: discord.Client;
+	_RateLimit: Promise<any>;
+	constructor(noblox: noblox, client: discord.Client);
+	RateLimit(limit?: number): Promise<any>;
+	async getRobloxUser(user: discord.UserResolvable): Promise<RobloxUser>;
+	async getRoleInGroup(player: UserResolvable, group: number): Promise<string>;
+}

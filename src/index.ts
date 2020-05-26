@@ -90,7 +90,7 @@ export class Client {
 	 * @param  {string}          group  The group to check in
 	 * @return {Promise<string>}        Promise resolving to role name
 	 */
-	async getRoleInGroup(player: UserResolvable, group: string): Promise<string> {
+	async getRoleInGroup(player: UserResolvable, group: number): Promise<string> {
 		if (player instanceof RobloxUser) {
 			var user = player;
 		} else {
