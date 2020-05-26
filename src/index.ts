@@ -19,9 +19,16 @@ function rateLimit(limit?: number) {
 
 type UserResolvable = RobloxUser | discord.UserResolvable;
 
+/*
+A reprensantation of a roblox user
+ */
 class RobloxUser {
 	username: string;
 	id: string
+	/**
+	 * @param {string} username roblox username
+	 * @param {string} id
+	 */
 	constructor(username: string, id: string) {
 		this.username = username;
 		this.id = id;

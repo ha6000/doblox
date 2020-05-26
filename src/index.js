@@ -13,7 +13,14 @@ function rateLimit(limit) {
         }, limit || apiRateLimit);
     });
 }
+/*
+A reprensantation of a roblox user
+ */
 class RobloxUser {
+    /**
+     * @param {string} username roblox username
+     * @param {string} id
+     */
     constructor(username, id) {
         this.username = username;
         this.id = id;

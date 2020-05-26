@@ -1,6 +1,8 @@
 ## Classes
 
 <dl>
+<dt><a href="#RobloxUser">RobloxUser</a></dt>
+<dd></dd>
 <dt><a href="#Client">Client</a></dt>
 <dd></dd>
 </dl>
@@ -8,10 +10,23 @@
 ## Typedefs
 
 <dl>
-<dt><a href="#UserResolvable">UserResolvable</a> : <code>RobloxUser</code> | <code>discord.UserResolvable</code></dt>
+<dt><a href="#UserResolvable">UserResolvable</a> : <code><a href="#RobloxUser">RobloxUser</a></code> | <code>discord.UserResolvable</code></dt>
 <dd><p>A value that resolves to a discord user or roblox user</p>
 </dd>
 </dl>
+
+<a name="RobloxUser"></a>
+
+## RobloxUser
+**Kind**: global class  
+<a name="new_RobloxUser_new"></a>
+
+### new RobloxUser(username, id)
+
+| Param | Type | Description |
+| --- | --- | --- |
+| username | <code>string</code> | roblox username |
+| id | <code>string</code> |  |
 
 <a name="Client"></a>
 
@@ -56,7 +71,7 @@ get a role of a user in a group
 
 <a name="UserResolvable"></a>
 
-## UserResolvable : <code>RobloxUser</code> \| <code>discord.UserResolvable</code>
+## UserResolvable : [<code>RobloxUser</code>](#RobloxUser) \| <code>discord.UserResolvable</code>
 A value that resolves to a discord user or roblox user
 
 **Kind**: global typedef  
