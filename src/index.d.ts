@@ -5,7 +5,7 @@ type noblox = object | any;
 
 type UserResolvable = RobloxUser | discord.UserResolvable;
 
-class RobloxUser {
+declare class RobloxUser {
 	username: string;
 	id: string
 	constructor(username: string, id: string) {
@@ -14,7 +14,7 @@ class RobloxUser {
 	}
 }
 
-class Client {
+declare class Client {
 	noblox: noblox;
 	client: discord.Client;
 	_RateLimit: Promise<any>;
