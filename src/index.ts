@@ -66,7 +66,7 @@ export class Client {
 	/**
 	 * @param {discord.UserResolvable} user The discord user to get robloxUser of
 	 */
-	async getRobloxUser(user: discord.UserResolvable): Promise<RobloxUser> {
+	async getRobloxUser(user: discord.UserResolvable): Promise<RobloxUser | undefined> {
 		const resolvedUser = this.client.users.resolve(user);
 		if (!resolvedUser) {
 			return Promise.reject({
@@ -93,8 +93,11 @@ export class Client {
 						});
 					}
 				}
-
 				return new RobloxUser(data.robloxUsername, data.robloxId);
+			})
+			.catch(error => {
+				if (error.response.status == 404) return undefined;
+				return Promise.reject(error);
 			});
 	}
 	/**
@@ -114,6 +117,10 @@ export class Client {
 				return error;
 			}
 		}
+		if (!user) return Promise.reject({
+			message: 'Invallid player',
+			errno: 0
+		});
 		return this.noblox.getRankNameInGroup(group, user.id);
 	}
 }

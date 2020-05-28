@@ -82,6 +82,11 @@ class Client {
                 }
             }
             return new RobloxUser(data.robloxUsername, data.robloxId);
+        })
+            .catch(error => {
+            if (error.response.status == 404)
+                return undefined;
+            return Promise.reject(error);
         });
     }
     /**
@@ -103,6 +108,11 @@ class Client {
                 return error;
             }
         }
+        if (!user)
+            return Promise.reject({
+                message: 'Invallid player',
+                errno: 0
+            });
         return this.noblox.getRankNameInGroup(group, user.id);
     }
 }
