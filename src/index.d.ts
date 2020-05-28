@@ -20,6 +20,6 @@ class Client {
 	_RateLimit: Promise<any>;
 	constructor(noblox: noblox, client: discord.Client);
 	RateLimit(limit?: number): Promise<any>;
-	async getRobloxUser(user: discord.UserResolvable): Promise<RobloxUser>;
-	async getRoleInGroup(player: UserResolvable, group: number): Promise<string>;
+	getRobloxUser(user: discord.UserResolvable): Promise<RobloxUser | undefined>;
+	getRoleInGroup(player: UserResolvable, group: number): Promise<string>;
 }
