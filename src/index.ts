@@ -41,6 +41,28 @@ class RobloxUser {
  * @typedef {RobloxUser | discord.UserResolvable} UserResolvable
  */
 
+ class NonOKStatus extends TypeError {
+	 constructor(response) {
+		 super('Non ok status');
+		 this.response = response;
+		 this.errno = 0;
+	 }
+ }
+
+class UnkownUser extends RefrenceError {
+	constructor() {
+		super('Unkown user');
+		this.errno = 1;
+	}
+}
+
+class InvallidPlayer extends TypeError {
+	constructor() {
+		super('Invallid player');
+		this.errno = 0;
+	}
+}
+
 /*
 Base client for api actions
  */
@@ -69,10 +91,7 @@ export class Client {
 	async getRobloxUser(user: discord.UserResolvable): Promise<RobloxUser | undefined> {
 		const resolvedUser = this.client.users.resolve(user);
 		if (!resolvedUser) {
-			return Promise.reject({
-				message: 'Unkown user',
-				errno: 1
-			});
+			throw new UnkownUser();
 		};
 		const userid = resolvedUser.id;
 		await this.RateLimit()
@@ -86,18 +105,14 @@ export class Client {
 								return this.getRobloxUser(userid);
 							});
 					} else {
-						return Promise.reject({
-							message: 'Non ok status',
-							errno: 0,
-							response: data
-						});
+						throw new NonOKStatus(response);
 					}
 				}
 				return new RobloxUser(data.robloxUsername, data.robloxId);
 			})
 			.catch(error => {
 				if (error.response.status == 404) return undefined;
-				return Promise.reject(error);
+				throw error;
 			});
 	}
 	/**
@@ -117,10 +132,7 @@ export class Client {
 				return error;
 			}
 		}
-		if (!user) return Promise.reject({
-			message: 'Invallid player',
-			errno: 0
-		});
+		if (!user) throw new InvallidPlayer();
 		return this.noblox.getRankNameInGroup(group, user.id);
 	}
 }
