@@ -1,3 +1,6 @@
 README.md
 docs.md
 .github
+*.tsbuildinfo
+tsconfig.json
+pnpm-lock.yaml
