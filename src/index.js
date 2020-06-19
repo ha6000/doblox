@@ -9,12 +9,7 @@ const apiEndpoints = {
 };
 const pify = require('pify');
 const Limiter = require('limiter');
-class AsyncLimiter extends Limiter {
-    constructor() {
-        super(...arguments);
-        this.asyncRemoveTokens = pify(this.removeTokens);
-    }
-}
+Limiter.asyncRemoveTokens = pify(Limiter.removeTokens);
 /*
 A reprensantation of a roblox user
  */
