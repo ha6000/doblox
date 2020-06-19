@@ -9,7 +9,7 @@ const apiEndpoints = {
 };
 const pify = require('pify');
 const Limiter = require('limiter').RateLimiter;
-Limiter.prototype.asyncRemoveTokens = pify(Limiter.removeTokens);
+Limiter.prototype.asyncRemoveTokens = pify(Limiter.prototype.removeTokens);
 /*
 A reprensantation of a roblox user
  */
