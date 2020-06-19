@@ -6,15 +6,19 @@ type noblox = object | any;
 const apiRateLimit = 1000;
 
 const apiEndpoints = {
-	user: 'https://verify.eryn.io/api/user/'
+	rover: 'https://verify.eryn.io/api/user/',
+	bloxlink: 'https://api.blox.link/v1/user/'
 }
 
-function rateLimit(limit?: number) {
-	return new Promise((resolve, reject) => {
-		setTimeout(() => {
-			resolve();
-		}, limit || apiRateLimit);
-	});
+const pify = require('pify');
+
+const Limiter = require('limiter');
+class AsyncLimiter extends Limiter {
+	constructor() {
+		super(...arguments);
+		this.asyncRemoveTokens = pify(this.removeTokens);
+	}
+	asyncRemoveTokens: Function
 }
 
 type UserResolvable = RobloxUser | discord.UserResolvable;
@@ -47,13 +51,16 @@ class RobloxUser {
 		 this.response = response;
 		 this.errno = 0;
 	 }
+	 response: any;
+	 errno: number
  }
 
-class UnkownUser extends RefrenceError {
+class UnkownUser extends ReferenceError {
 	constructor() {
 		super('Unkown user');
 		this.errno = 1;
 	}
+	errno: number
 }
 
 class InvallidPlayer extends TypeError {
@@ -61,6 +68,7 @@ class InvallidPlayer extends TypeError {
 		super('Invallid player');
 		this.errno = 0;
 	}
+	errno: number
 }
 
 /*
@@ -69,7 +77,7 @@ Base client for api actions
 export class Client {
 	noblox: noblox;
 	client: discord.Client;
-	_RateLimit: Promise<any>;
+	_RateLimit: typeof Limiter;
 	/**
 	 * @param {noblox}         noblox Your noblox module object
 	 * @param {discord.Client} client A discord client
@@ -77,13 +85,7 @@ export class Client {
 	constructor(noblox: noblox, client: discord.Client) {
 		this.noblox = noblox;
 		this.client = client;
-		this._RateLimit = Promise.resolve();
-	}
-	RateLimit(limit?: number) {
-		return this._RateLimit = this._RateLimit
-			.then(() => {
-				return rateLimit(limit);
-			});
+		this._RateLimit = new Limiter();
 	}
 	/**
 	 * @param {discord.UserResolvable} user The discord user to get robloxUser of
@@ -94,19 +96,12 @@ export class Client {
 			throw new UnkownUser();
 		};
 		const userid = resolvedUser.id;
-		await this.RateLimit()
-		return axios.get(apiEndpoints.user + userid)
+		await this._RateLimit.asyncRemoveTokens(1);
+		return axios.get(apiEndpoints.rover + userid)
 			.then((response) => {
 				const data = response.data;
 				if (data.status != 'ok') {
-					if (data.retryAfterSeconds) {
-						return this.RateLimit(data.retryAfterSeconds)
-							.then(() => {
-								return this.getRobloxUser(userid);
-							});
-					} else {
-						throw new NonOKStatus(response);
-					}
+					throw new NonOKStatus(response);
 				}
 				return new RobloxUser(data.robloxUsername, data.robloxId);
 			})
@@ -129,7 +124,7 @@ export class Client {
 				var user = await this.getRobloxUser(player);
 			} catch (error) {
 				console.log(error);
-				return error;
+				throw error;
 			}
 		}
 		if (!user) throw new InvallidPlayer();

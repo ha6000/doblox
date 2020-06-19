@@ -4,14 +4,16 @@ exports.Client = void 0;
 const axios_1 = require("axios");
 const apiRateLimit = 1000;
 const apiEndpoints = {
-    user: 'https://verify.eryn.io/api/user/'
+    rover: 'https://verify.eryn.io/api/user/',
+    bloxlink: 'https://api.blox.link/v1/user/'
 };
-function rateLimit(limit) {
-    return new Promise((resolve, reject) => {
-        setTimeout(() => {
-            resolve();
-        }, limit || apiRateLimit);
-    });
+const pify = require('pify');
+const Limiter = require('limiter');
+class AsyncLimiter extends Limiter {
+    constructor() {
+        super(...arguments);
+        this.asyncRemoveTokens = pify(this.removeTokens);
+    }
 }
 /*
 A reprensantation of a roblox user
@@ -30,6 +32,25 @@ class RobloxUser {
  * A value that resolves to a discord user or roblox user
  * @typedef {RobloxUser | discord.UserResolvable} UserResolvable
  */
+class NonOKStatus extends TypeError {
+    constructor(response) {
+        super('Non ok status');
+        this.response = response;
+        this.errno = 0;
+    }
+}
+class UnkownUser extends ReferenceError {
+    constructor() {
+        super('Unkown user');
+        this.errno = 1;
+    }
+}
+class InvallidPlayer extends TypeError {
+    constructor() {
+        super('Invallid player');
+        this.errno = 0;
+    }
+}
 /*
 Base client for api actions
  */
@@ -41,13 +62,7 @@ class Client {
     constructor(noblox, client) {
         this.noblox = noblox;
         this.client = client;
-        this._RateLimit = Promise.resolve();
-    }
-    RateLimit(limit) {
-        return this._RateLimit = this._RateLimit
-            .then(() => {
-            return rateLimit(limit);
-        });
+        this._RateLimit = new Limiter();
     }
     /**
      * @param {discord.UserResolvable} user The discord user to get robloxUser of
@@ -55,38 +70,23 @@ class Client {
     async getRobloxUser(user) {
         const resolvedUser = this.client.users.resolve(user);
         if (!resolvedUser) {
-            return Promise.reject({
-                message: 'Unkown user',
-                errno: 1
-            });
+            throw new UnkownUser();
         }
         ;
         const userid = resolvedUser.id;
-        await this.RateLimit();
-        return axios_1.default.get(apiEndpoints.user + userid)
+        await this._RateLimit.asyncRemoveTokens(1);
+        return axios_1.default.get(apiEndpoints.rover + userid)
             .then((response) => {
             const data = response.data;
             if (data.status != 'ok') {
-                if (data.retryAfterSeconds) {
-                    return this.RateLimit(data.retryAfterSeconds)
-                        .then(() => {
-                        return this.getRobloxUser(userid);
-                    });
-                }
-                else {
-                    return Promise.reject({
-                        message: 'Non ok status',
-                        errno: 0,
-                        response: data
-                    });
-                }
+                throw new NonOKStatus(response);
             }
             return new RobloxUser(data.robloxUsername, data.robloxId);
         })
             .catch(error => {
             if (error.response.status == 404)
                 return undefined;
-            return Promise.reject(error);
+            throw error;
         });
     }
     /**
@@ -105,14 +105,11 @@ class Client {
             }
             catch (error) {
                 console.log(error);
-                return error;
+                throw error;
             }
         }
         if (!user)
-            return Promise.reject({
-                message: 'Invallid player',
-                errno: 0
-            });
+            throw new InvallidPlayer();
         return this.noblox.getRankNameInGroup(group, user.id);
     }
 }
