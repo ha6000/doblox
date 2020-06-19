@@ -12,8 +12,8 @@ const apiEndpoints = {
 
 const pify = require('pify');
 
-const Limiter = require('limiter');
-Limiter.asyncRemoveTokens = pify(Limiter.removeTokens);
+const Limiter = require('limiter').RateLimiter;
+Limiter.prototype.asyncRemoveTokens = pify(Limiter.removeTokens);
 
 type UserResolvable = RobloxUser | discord.UserResolvable;
 

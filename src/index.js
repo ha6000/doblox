@@ -8,8 +8,8 @@ const apiEndpoints = {
     bloxlink: 'https://api.blox.link/v1/user/'
 };
 const pify = require('pify');
-const Limiter = require('limiter');
-Limiter.asyncRemoveTokens = pify(Limiter.removeTokens);
+const Limiter = require('limiter').RateLimiter;
+Limiter.prototype.asyncRemoveTokens = pify(Limiter.removeTokens);
 /*
 A reprensantation of a roblox user
  */
