@@ -21,13 +21,14 @@ const providers = {
             return `${this.baseURL}${userid}${options.guild && user instanceof discord.GuildMember ? `?guild=${user.guild.id}` : ''}`;
         },
         handleData: async function (data, partial, user, options) {
+            const id = options.guild ? data.matchingAccount || data.primaryAccount : data.primaryAccount;
             if (partial) {
                 return {
-                    id: data.primaryAccount
+                    id
                 };
             }
             else {
-                return this.axios.get(`https://users.roblox.com/v1/users/${data.primaryAccount}`)
+                return this.axios.get(`https://users.roblox.com/v1/users/${id}`)
                     .then(res => {
                     const data = res.data;
                     return {
