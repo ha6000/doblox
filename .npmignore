@@ -4,3 +4,4 @@ docs.md
 *.tsbuildinfo
 tsconfig.json
 pnpm-lock.yaml
+test.js
