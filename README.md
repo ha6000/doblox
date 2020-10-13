@@ -13,6 +13,16 @@ Removed noblox API endpoints and added option choose what provider you want, rov
 npm i doblox
 ```
 
+## Example
+```js
+
+const doblox = new Doblox(null, client, {
+	provider: 'bloxlink'
+});
+
+const user = await doblox.getRobloxUser('670588428970098708');
+```
+
 ## Documentation
 [Wiki](https://github.com/ha6000/doblox/wiki/Docs) [Typings](https://github.com/ha6000/doblox/blob/master/src/index.d.ts)
 
