@@ -36,6 +36,8 @@ const providers = {
 		handleData: async function(data, partial: boolean, user, options) {
 			const id = options.guild ? data.matchingAccount || data.primaryAccount : data.primaryAccount;
 
+			if (!id) return;
+
 			if (partial) {
 				return {
 					id
@@ -205,6 +207,8 @@ export class Client {
 					throw response;
 				}
 				const userData = await this.provider.handleData.call(this, data, partial, user, options);
+
+				if (!userData) return;
 
 				return new RobloxUser(userData, partial);
 			})
