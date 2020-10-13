@@ -1,18 +1,38 @@
-import Discord from "discord.js";
-import Noblox from "noblox.js";
-
-interface robloxPlayer {
-    name: string,
-    id: number
+import * as axios from "axios";
+import * as discord from 'discord.js';
+declare type noblox = object | any;
+declare type ClientOptions = {
+    provider: string;
 };
-
-type rankName = string;
-type groupId = number;
-
-declare class Doblox {
-    constructor(noblox: Object, client: Discord.Client);
-    getRobloxPlayer(user: Discord.UserResolvable): Promise<robloxPlayer>
-    getRankInGroup(user: Discord.UserResolvable, groupId: groupId): Promise<rankName>
-};
-
-export default Doblox;
+declare const Limiter: any;
+declare class RobloxUser {
+    username: string;
+    id: string;
+    description: string;
+    createdAt: Date;
+    partial: Boolean;
+    /**
+     * @param {Object}  data    RobloxUser data
+     * @param {Boolean} partial Whether its a partial
+     */
+    constructor(data: any, partial: Boolean);
+}
+export declare class Client {
+    noblox: noblox;
+    client: discord.Client;
+    options: ClientOptions;
+    provider: any;
+    _RateLimit: typeof Limiter;
+    providerAxios: axios.AxiosInstance;
+    axios: axios.AxiosInstance;
+    /**
+     * @param {noblox}         noblox Your noblox module object, not required but kept for backwards compatibility.
+     * @param {discord.Client} client A discord client
+     */
+    constructor(noblox: noblox | undefined, client: discord.Client, options: ClientOptions);
+    /**
+     * @param {discord.UserResolvable} user The discord user to get robloxUser of
+     */
+    getRobloxUser(user: discord.UserResolvable, partial?: Boolean): Promise<RobloxUser | undefined>;
+}
+export {};

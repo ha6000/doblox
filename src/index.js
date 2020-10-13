@@ -1,81 +1,155 @@
-const fetch = require('node-fetch');
-const roverUserApiUrl = new URL('https://verify.eryn.io/api/user/');
-
-/**
- * Object containing your noblox module
- * @typedef {Object} Noblox
- */
-
-/**
- * A Discord UserResolvable or roblox id
- * @typedef {(Discord.UserResolvable|robloxPlayer)} player
- */
-
-/**
- * A player information Object
- * @typedef {Object} robloxPlayer
- * @property {string} name The name of the roblox player
- * @property {number} id Id of the player
- */
-
-/**
- * Main class for doblox, allowes you interact with most roblox things.
- * @class
- */
-class Doblox {
-	/**
-	 * @param  {Noblox} noblox Noblox module
-	 * @param  {Discord.Client} client Discord.js client
-	 */
-	constructor(noblox, client) {
-		this.noblox = noblox;
-		this.client = client;
-	};
-	/**
-	 * Gets information of a roblox player
-	 * @param  {Discord.UserResolvable} user The Discord user
-	 * @return {robloxPlayer}      The information
-	 */
-	getRobloxPlayer(user) {
-		return new Promise((resolve, reject) => {
-			user = this.client.users.resolve(user);
-			var userUrl = new URL(roverUserApiUrl);
-			userUrl.pathname += user.id;
-			fetch(userUrl).then(res => res.json()).then(json => {
-				if (json.errorCode) return resolve(undefined);
-				resolve({
-					name: json.robloxUsername,
-					id: json.robloxId
-				});
-			}).catch(error => {
-				reject(error);
-			});
-		});
-	};
-	/**
-	 * Gets the rank of a player in a group
-	 * @param  {player} user The player you want the information of
-	 * @param  {string} groupId The group the rank is in
-	 * @return {Promise<string>}         Returns Promise with the name of the rank
-	 */
-	getRankInGroup(user, groupId) {
-		return new Promise(async (resolve, reject) => {
-			var player;
-			if (typeof user == 'object') {
-				player = user;
-			} else {
-				try {
-					await getRobloxPlayer(user);
-				} catch (error) {
-					reject(error);
-				};
-			};
-		
-			this.noblox.getRankNameInGroup(groupId, player.id).then(name => {
-				resolve(name);
-			}).catch(reject);
-		});
-	};
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Client = void 0;
+const axios = require("axios");
+const Axios = axios.default;
+const defaultClientOptions = {
+    provider: 'bloxlink'
 };
-
-module.exports = Doblox;
+const providers = {
+    rover: {
+        baseURL: 'https://verify.eryn.io/api/user/',
+        requests: 60,
+        per: 60 * 1000
+    },
+    bloxlink: {
+        baseURL: 'https://api.blox.link/v1/user/',
+        requests: 60,
+        per: 60 * 1000,
+        handleData: async function (data, partial) {
+            if (partial) {
+                return {
+                    id: data.primaryAccount
+                };
+            }
+            else {
+                return this.axios.get(`https://users.roblox.com/v1/users/${data.primaryAccount}`)
+                    .then(res => {
+                    const data = res.data;
+                    return {
+                        username: data.name,
+                        id: data.id,
+                        description: data.description,
+                        createdAt: new Date(data.created)
+                    };
+                });
+            }
+        }
+    }
+};
+const pify = require('pify');
+const Limiter = require('limiter').RateLimiter;
+Limiter.prototype.asyncRemoveTokens = pify(Limiter.prototype.removeTokens);
+/*
+ * A reprensantation of a roblox user, when partial, id is the only value guaranteed.
+ * @class RobloxUser
+ */
+class RobloxUser {
+    /**
+     * @param {Object}  data    RobloxUser data
+     * @param {Boolean} partial Whether its a partial
+     */
+    constructor(data, partial) {
+        /**
+         * Username of the user
+         * @type {String}
+         */
+        this.username = data.username;
+        /**
+         * ID of the user
+         * @type {Number}
+         */
+        this.id = data.id;
+        /**
+         * Description of the user
+         * @type {String}
+         */
+        this.description = data.description;
+        /**
+         * Date at which the user was created at
+         * @type {Date}
+         */
+        this.createdAt = data.createdAt;
+        /**
+         * Whether the data is partial
+         * @type {Boolean}
+         */
+        this.partial = partial;
+    }
+}
+/**
+ * A value that resolves to a discord user or roblox user
+ * @typedef {RobloxUser | discord.UserResolvable} UserResolvable
+ */
+class UnkownUser extends ReferenceError {
+    constructor() {
+        super('Unkown user');
+        this.errno = 1;
+    }
+}
+class InvallidPlayer extends TypeError {
+    constructor() {
+        super('Invallid player');
+        this.errno = 0;
+    }
+}
+/*
+Base client for api actions
+ */
+class Client {
+    /**
+     * @param {noblox}         noblox Your noblox module object, not required but kept for backwards compatibility.
+     * @param {discord.Client} client A discord client
+     */
+    constructor(noblox, client, options) {
+        this.noblox = noblox;
+        this.client = client;
+        this.options = Object.assign({}, defaultClientOptions, options);
+        this.provider = providers[this.options.provider];
+        if (!this.provider)
+            throw new ReferenceError('No such provider');
+        this.providerAxios = Axios.create({
+            baseURL: this.provider.baseURL
+        });
+        this.axios = Axios.create({});
+        this._RateLimit = new Limiter();
+    }
+    /**
+     * @param {discord.UserResolvable} user The discord user to get robloxUser of
+     */
+    async getRobloxUser(user, partial = false) {
+        let userid;
+        let resolvedUser = this.client.users.resolve(user);
+        if (!resolvedUser) {
+            if (typeof user == 'string') {
+                userid = user;
+            }
+            else {
+                throw new UnkownUser();
+            }
+        }
+        else {
+            userid = resolvedUser.id;
+        }
+        ;
+        await this._RateLimit.asyncRemoveTokens(1);
+        return this.providerAxios.get(userid)
+            .then(async (response) => {
+            const data = response.data;
+            if (data && data.status != 'ok') {
+                throw response;
+            }
+            const userData = await this.provider.handleData.call(this, data, partial);
+            return new RobloxUser(userData, partial);
+        })
+            .catch(async (err) => {
+            if (err.response && err.response.status == 404)
+                return undefined;
+            if (err.data) {
+                throw new Error(err.data.error);
+            }
+            throw err;
+        });
+    }
+}
+exports.Client = Client;

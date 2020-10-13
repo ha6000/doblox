@@ -1,93 +1,102 @@
 ## Classes
 
 <dl>
-<dt><a href="#Doblox">Doblox</a></dt>
-<dd><p>Main class for doblox, allowes you interact with most roblox things.</p>
-</dd>
+<dt><a href="#RobloxUser">RobloxUser</a></dt>
+<dd></dd>
+<dt><a href="#Client">Client</a></dt>
+<dd></dd>
 </dl>
 
 ## Typedefs
 
 <dl>
-<dt><a href="#Noblox">Noblox</a> : <code>Object</code></dt>
-<dd><p>Object containing your noblox module</p>
-</dd>
-<dt><a href="#player">player</a> : <code>Discord.UserResolvable</code> | <code><a href="#robloxPlayer">robloxPlayer</a></code></dt>
-<dd><p>A Discord UserResolvable or roblox id</p>
-</dd>
-<dt><a href="#robloxPlayer">robloxPlayer</a> : <code>Object</code></dt>
-<dd><p>A player information Object</p>
+<dt><a href="#UserResolvable">UserResolvable</a> : <code><a href="#RobloxUser">RobloxUser</a></code> | <code>discord.UserResolvable</code></dt>
+<dd><p>A value that resolves to a discord user or roblox user</p>
 </dd>
 </dl>
 
-<a name="Doblox"></a>
+<a name="RobloxUser"></a>
 
-## Doblox
-Main class for doblox, allowes you interact with most roblox things.
-
+## RobloxUser
 **Kind**: global class  
 
-* [Doblox](#Doblox)
-    * [new Doblox(noblox, client)](#new_Doblox_new)
-    * [.getRobloxPlayer(user)](#Doblox+getRobloxPlayer) ⇒ [<code>robloxPlayer</code>](#robloxPlayer)
-    * [.getRankInGroup(user, groupId)](#Doblox+getRankInGroup) ⇒ <code>Promise.&lt;string&gt;</code>
+* [RobloxUser](#RobloxUser)
+    * [new RobloxUser(data, partial)](#new_RobloxUser_new)
+    * [.username](#RobloxUser+username) : <code>String</code>
+    * [.id](#RobloxUser+id) : <code>Number</code>
+    * [.description](#RobloxUser+description) : <code>String</code>
+    * [.createdAt](#RobloxUser+createdAt) : <code>Date</code>
+    * [.partial](#RobloxUser+partial) : <code>Boolean</code>
 
-<a name="new_Doblox_new"></a>
+<a name="new_RobloxUser_new"></a>
 
-### new Doblox(noblox, client)
-
-| Param | Type | Description |
-| --- | --- | --- |
-| noblox | [<code>Noblox</code>](#Noblox) | Noblox module |
-| client | <code>Discord.Client</code> | Discord.js client |
-
-<a name="Doblox+getRobloxPlayer"></a>
-
-### doblox.getRobloxPlayer(user) ⇒ [<code>robloxPlayer</code>](#robloxPlayer)
-Gets information of a roblox player
-
-**Kind**: instance method of [<code>Doblox</code>](#Doblox)  
-**Returns**: [<code>robloxPlayer</code>](#robloxPlayer) - The information  
+### new RobloxUser(data, partial)
 
 | Param | Type | Description |
 | --- | --- | --- |
-| user | <code>Discord.UserResolvable</code> | The Discord user |
+| data | <code>Object</code> | RobloxUser data |
+| partial | <code>Boolean</code> | Whether its a partial |
 
-<a name="Doblox+getRankInGroup"></a>
+<a name="RobloxUser+username"></a>
 
-### doblox.getRankInGroup(user, groupId) ⇒ <code>Promise.&lt;string&gt;</code>
-Gets the rank of a player in a group
+### robloxUser.username : <code>String</code>
+Username of the user
 
-**Kind**: instance method of [<code>Doblox</code>](#Doblox)  
-**Returns**: <code>Promise.&lt;string&gt;</code> - Returns Promise with the name of the rank  
+**Kind**: instance property of [<code>RobloxUser</code>](#RobloxUser)  
+<a name="RobloxUser+id"></a>
+
+### robloxUser.id : <code>Number</code>
+ID of the user
+
+**Kind**: instance property of [<code>RobloxUser</code>](#RobloxUser)  
+<a name="RobloxUser+description"></a>
+
+### robloxUser.description : <code>String</code>
+Description of the user
+
+**Kind**: instance property of [<code>RobloxUser</code>](#RobloxUser)  
+<a name="RobloxUser+createdAt"></a>
+
+### robloxUser.createdAt : <code>Date</code>
+Date at which the user was created at
+
+**Kind**: instance property of [<code>RobloxUser</code>](#RobloxUser)  
+<a name="RobloxUser+partial"></a>
+
+### robloxUser.partial : <code>Boolean</code>
+Whether the data is partial
+
+**Kind**: instance property of [<code>RobloxUser</code>](#RobloxUser)  
+<a name="Client"></a>
+
+## Client
+**Kind**: global class  
+
+* [Client](#Client)
+    * [new Client(noblox, client)](#new_Client_new)
+    * [.getRobloxUser(user)](#Client+getRobloxUser)
+
+<a name="new_Client_new"></a>
+
+### new Client(noblox, client)
 
 | Param | Type | Description |
 | --- | --- | --- |
-| user | [<code>player</code>](#player) | The player you want the information of |
-| groupId | <code>string</code> | The group the rank is in |
+| noblox | <code>noblox</code> | Your noblox module object, not required but kept for backwards compatibility. |
+| client | <code>discord.Client</code> | A discord client |
 
-<a name="Noblox"></a>
+<a name="Client+getRobloxUser"></a>
 
-## Noblox : <code>Object</code>
-Object containing your noblox module
+### client.getRobloxUser(user)
+**Kind**: instance method of [<code>Client</code>](#Client)  
 
-**Kind**: global typedef  
-<a name="player"></a>
-
-## player : <code>Discord.UserResolvable</code> \| [<code>robloxPlayer</code>](#robloxPlayer)
-A Discord UserResolvable or roblox id
-
-**Kind**: global typedef  
-<a name="robloxPlayer"></a>
-
-## robloxPlayer : <code>Object</code>
-A player information Object
-
-**Kind**: global typedef  
-**Properties**
-
-| Name | Type | Description |
+| Param | Type | Description |
 | --- | --- | --- |
-| name | <code>string</code> | The name of the roblox player |
-| id | <code>number</code> | Id of the player |
+| user | <code>discord.UserResolvable</code> | The discord user to get robloxUser of |
 
+<a name="UserResolvable"></a>
+
+## UserResolvable : [<code>RobloxUser</code>](#RobloxUser) \| <code>discord.UserResolvable</code>
+A value that resolves to a discord user or roblox user
+
+**Kind**: global typedef  
