@@ -17,6 +17,9 @@ const providers = {
         baseURL: 'https://api.blox.link/v1/user/',
         requests: 60,
         per: 60 * 1000,
+        handleURL(user, partial, options, doblox) {
+            return `${this.baseURL}${options.guild && user instanceof discord.GuildMember ? `?guild=${user.guild.id}` : ''}`;
+        },
         handleData: async function (data, partial, user, options) {
             if (partial) {
                 return {
@@ -24,7 +27,7 @@ const providers = {
                 };
             }
             else {
-                return this.axios.get(`https://users.roblox.com/v1/users/${data.primaryAccount}${options.guild && user instanceof discord.GuildMember ? `?guild=${user.guild.id}` : ''}`)
+                return this.axios.get(`https://users.roblox.com/v1/users/${data.primaryAccount}`)
                     .then(res => {
                     const data = res.data;
                     return {
@@ -151,7 +154,7 @@ class Client {
         }
         ;
         await this._RateLimit.asyncRemoveTokens(1);
-        return this.providerAxios.get(userid)
+        return (typeof this.provider.handleURL == 'function' ? this.axios.get(this.provider.handleURL(user, partial, options, this)) : this.providerAxios.get(userid))
             .then(async (response) => {
             const data = response.data;
             if (data && data.status != 'ok') {

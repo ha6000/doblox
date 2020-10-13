@@ -38,6 +38,8 @@ export declare class Client {
     constructor(noblox: noblox | undefined, client: discord.Client, options: ClientOptions);
     /**
      * @param {discord.UserResolvable} user The discord user to get robloxUser of
+     * @param {Boolean} partial Wether to return a partial
+     * @param {Object} options Options to pass to the provider
      */
     getRobloxUser(user: discord.UserResolvable, partial: Boolean, options: any): Promise<RobloxUser | undefined>;
 }
