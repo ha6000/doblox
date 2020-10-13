@@ -2,3 +2,4 @@ node_modules
 test
 pnpm-lock.yaml
 *.tsbuildinfo
+test.js
