@@ -41,18 +41,39 @@ const pify = require('pify');
 const Limiter = require('limiter').RateLimiter;
 Limiter.prototype.asyncRemoveTokens = pify(Limiter.prototype.removeTokens);
 /*
-A reprensantation of a roblox user, when partial, id is the only value guaranteed.
+ * A reprensantation of a roblox user, when partial, id is the only value guaranteed.
+ * @class RobloxUser
  */
 class RobloxUser {
     /**
-     * @param {object} data RobloxUser data
-     * @param {boolean} partial Whether it's a partial
+     * @param {Object}  data    RobloxUser data
+     * @param {Boolean} partial Whether its a partial
      */
     constructor(data, partial) {
+        /**
+         * Username of the user
+         * @type {String}
+         */
         this.username = data.username;
+        /**
+         * ID of the user
+         * @type {Number}
+         */
         this.id = data.id;
+        /**
+         * Description of the user
+         * @type {String}
+         */
         this.description = data.description;
+        /**
+         * Date at which the user was created at
+         * @type {Date}
+         */
         this.createdAt = data.createdAt;
+        /**
+         * Whether the data is partial
+         * @type {Boolean}
+         */
         this.partial = partial;
     }
 }

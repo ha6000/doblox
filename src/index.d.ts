@@ -11,6 +11,10 @@ declare class RobloxUser {
     description: string;
     createdAt: Date;
     partial: Boolean;
+    /**
+     * @param {Object}  data    RobloxUser data
+     * @param {Boolean} partial Whether its a partial
+     */
     constructor(data: any, partial: Boolean);
 }
 export declare class Client {

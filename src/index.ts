@@ -61,43 +61,44 @@ Limiter.prototype.asyncRemoveTokens = pify(Limiter.prototype.removeTokens);
 type UserResolvable = RobloxUser | discord.UserResolvable;
 
 /*
-A reprensantation of a roblox user, when partial, id is the only value guaranteed.
+ * A reprensantation of a roblox user, when partial, id is the only value guaranteed.
+ * @class RobloxUser
  */
 class RobloxUser {
-	/**
-	 * Username of the user
-	 * @type {string}
-	 */
 	username: string;
-	/**
-	 * ID of the user
-	 * @type {string}
-	 */
 	id: string
-	/**
-	 * Description of the user
-	 * @type {string}
-	 */
 	description: string;
-	/**
-	 * Date at which the user is created
-	 * @type {Date}
-	 */
 	createdAt: Date
-	/**
-	 * Whether it is partial data, id is only garunteed property.
-	 * @type {Boolean}
-	 */
 	partial: Boolean
 	/**
-	 * @param {object} data RobloxUser data
-	 * @param {boolean} partial Whether it's a partial
+	 * @param {Object}  data    RobloxUser data
+	 * @param {Boolean} partial Whether its a partial
 	 */
 	constructor(data, partial: Boolean) {
+		/**
+		 * Username of the user
+		 * @type {String}
+		 */
 		this.username = data.username;
+		/**
+		 * ID of the user
+		 * @type {Number}
+		 */
 		this.id = data.id;
+		/**
+		 * Description of the user
+		 * @type {String}
+		 */
 		this.description = data.description;
+		/**
+		 * Date at which the user was created at
+		 * @type {Date}
+		 */
 		this.createdAt = data.createdAt;
+		/**
+		 * Whether the data is partial
+		 * @type {Boolean}
+		 */
 		this.partial = partial;
 	}
 }
