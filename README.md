@@ -4,8 +4,8 @@
 > Open Source module to handle integration between Discord and Roblox
 ***
 
-## New Release
-Both API should be compatible just a lot of improvements and switched TypeScript
+## New Release v4
+Removed noblox API endpoints and added option choose what provider you want, rover or bloxlink
 
 ## Installation
 
