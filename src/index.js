@@ -1,39 +1,65 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Client = void 0;
-const axios_1 = require("axios");
-const apiRateLimit = 1000;
-const apiEndpoints = {
-    rover: 'https://verify.eryn.io/api/user/',
-    bloxlink: 'https://api.blox.link/v1/user/'
+const axios = require("axios");
+const Axios = axios.default;
+const defaultClientOptions = {
+    provider: 'bloxlink'
+};
+const providers = {
+    rover: {
+        baseURL: 'https://verify.eryn.io/api/user/',
+        requests: 60,
+        per: 60 * 1000
+    },
+    bloxlink: {
+        baseURL: 'https://api.blox.link/v1/user/',
+        requests: 60,
+        per: 60 * 1000,
+        handleData: async function (data, partial) {
+            if (partial) {
+                return {
+                    id: data.primaryAccount
+                };
+            }
+            else {
+                return this.axios.get(`https://users.roblox.com/v1/users/${data.primaryAccount}`)
+                    .then(res => {
+                    const data = res.data;
+                    return {
+                        username: data.name,
+                        id: data.id,
+                        description: data.description,
+                        createdAt: new Date(data.created)
+                    };
+                });
+            }
+        }
+    }
 };
 const pify = require('pify');
 const Limiter = require('limiter').RateLimiter;
 Limiter.prototype.asyncRemoveTokens = pify(Limiter.prototype.removeTokens);
 /*
-A reprensantation of a roblox user
+A reprensantation of a roblox user, when partial, id is the only value guaranteed.
  */
 class RobloxUser {
     /**
-     * @param {string} username roblox username
-     * @param {string} id
+     * @param {object} data RobloxUser data
+     * @param {boolean} partial Whether it's a partial
      */
-    constructor(username, id) {
-        this.username = username;
-        this.id = id;
+    constructor(data, partial) {
+        this.username = data.username;
+        this.id = data.id;
+        this.description = data.description;
+        this.createdAt = data.createdAt;
+        this.partial = partial;
     }
 }
 /**
  * A value that resolves to a discord user or roblox user
  * @typedef {RobloxUser | discord.UserResolvable} UserResolvable
  */
-class NonOKStatus extends TypeError {
-    constructor(response) {
-        super('Non ok status');
-        this.response = response;
-        this.errno = 0;
-    }
-}
 class UnkownUser extends ReferenceError {
     constructor() {
         super('Unkown user');
@@ -51,61 +77,58 @@ Base client for api actions
  */
 class Client {
     /**
-     * @param {noblox}         noblox Your noblox module object
+     * @param {noblox}         noblox Your noblox module object, not required but kept for backwards compatibility.
      * @param {discord.Client} client A discord client
      */
-    constructor(noblox, client) {
+    constructor(noblox, client, options) {
         this.noblox = noblox;
         this.client = client;
+        this.options = Object.assign({}, defaultClientOptions, options);
+        this.provider = providers[this.options.provider];
+        if (!this.provider)
+            throw new ReferenceError('No such provider');
+        this.providerAxios = Axios.create({
+            baseURL: this.provider.baseURL
+        });
+        this.axios = Axios.create({});
         this._RateLimit = new Limiter();
     }
     /**
      * @param {discord.UserResolvable} user The discord user to get robloxUser of
      */
-    async getRobloxUser(user) {
-        const resolvedUser = this.client.users.resolve(user);
+    async getRobloxUser(user, partial = false) {
+        let userid;
+        let resolvedUser = this.client.users.resolve(user);
         if (!resolvedUser) {
-            throw new UnkownUser();
-        }
-        ;
-        const userid = resolvedUser.id;
-        await this._RateLimit.asyncRemoveTokens(1);
-        return axios_1.default.get(apiEndpoints.rover + userid)
-            .then((response) => {
-            const data = response.data;
-            if (data.status != 'ok') {
-                throw new NonOKStatus(response);
+            if (typeof user == 'string') {
+                userid = user;
             }
-            return new RobloxUser(data.robloxUsername, data.robloxId);
-        })
-            .catch(error => {
-            if (error.response.status == 404)
-                return undefined;
-            throw error;
-        });
-    }
-    /**
-     * get a role of a user in a group
-     * @param  {UserResolvable}  player A roblox user or discord user
-     * @param  {string}          group  The group to check in
-     * @return {Promise<string>}        Promise resolving to role name
-     */
-    async getRoleInGroup(player, group) {
-        if (player instanceof RobloxUser) {
-            var user = player;
+            else {
+                throw new UnkownUser();
+            }
         }
         else {
-            try {
-                var user = await this.getRobloxUser(player);
-            }
-            catch (error) {
-                console.log(error);
-                throw error;
-            }
+            userid = resolvedUser.id;
         }
-        if (!user)
-            throw new InvallidPlayer();
-        return this.noblox.getRankNameInGroup(group, user.id);
+        ;
+        await this._RateLimit.asyncRemoveTokens(1);
+        return this.providerAxios.get(userid)
+            .then(async (response) => {
+            const data = response.data;
+            if (data && data.status != 'ok') {
+                throw response;
+            }
+            const userData = await this.provider.handleData.call(this, data, partial);
+            return new RobloxUser(userData, partial);
+        })
+            .catch(async (err) => {
+            if (err.response && err.response.status == 404)
+                return undefined;
+            if (err.data) {
+                throw new Error(err.data.error);
+            }
+            throw err;
+        });
     }
 }
 exports.Client = Client;

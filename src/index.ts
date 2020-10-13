@@ -1,14 +1,57 @@
-import axios from "axios";
+import * as axios from  "axios";
 import * as discord from 'discord.js';
+
+const Axios = axios.default;
 
 type noblox = object | any;
 
-const apiRateLimit = 1000;
+type ClientOptions = {
+	provider: string
+};
 
-const apiEndpoints = {
-	rover: 'https://verify.eryn.io/api/user/',
-	bloxlink: 'https://api.blox.link/v1/user/'
-}
+const defaultClientOptions = {
+	provider: 'bloxlink'
+};
+
+type Provider = {
+	baseURL: string,
+	requests: number,
+	per: number,
+	handleData: Function
+};
+
+const providers = {
+	rover: {
+		baseURL: 'https://verify.eryn.io/api/user/',
+		requests: 60,
+		per: 60 * 1000
+	},
+	bloxlink: {
+		baseURL: 'https://api.blox.link/v1/user/',
+		requests: 60,
+		per: 60 * 1000,
+		handleData: async function(data, partial: boolean) {
+			if (partial) {
+				return {
+					id: data.primaryAccount
+				};
+			}
+			else {
+				return this.axios.get(`https://users.roblox.com/v1/users/${data.primaryAccount}`)
+					.then(res => {
+						const data = res.data;
+
+						return {
+							username: data.name,
+							id: data.id,
+							description: data.description,
+							createdAt: new Date(data.created)
+						};
+					});
+			}
+		}
+	}
+};
 
 const pify = require('pify');
 
@@ -18,18 +61,44 @@ Limiter.prototype.asyncRemoveTokens = pify(Limiter.prototype.removeTokens);
 type UserResolvable = RobloxUser | discord.UserResolvable;
 
 /*
-A reprensantation of a roblox user
+A reprensantation of a roblox user, when partial, id is the only value guaranteed.
  */
 class RobloxUser {
+	/**
+	 * Username of the user
+	 * @type {string}
+	 */
 	username: string;
+	/**
+	 * ID of the user
+	 * @type {string}
+	 */
 	id: string
 	/**
-	 * @param {string} username roblox username
-	 * @param {string} id
+	 * Description of the user
+	 * @type {string}
 	 */
-	constructor(username: string, id: string) {
-		this.username = username;
-		this.id = id;
+	description: string;
+	/**
+	 * Date at which the user is created
+	 * @type {Date}
+	 */
+	createdAt: Date
+	/**
+	 * Whether it is partial data, id is only garunteed property.
+	 * @type {Boolean}
+	 */
+	partial: Boolean
+	/**
+	 * @param {object} data RobloxUser data
+	 * @param {boolean} partial Whether it's a partial
+	 */
+	constructor(data, partial: Boolean) {
+		this.username = data.username;
+		this.id = data.id;
+		this.description = data.description;
+		this.createdAt = data.createdAt;
+		this.partial = partial;
 	}
 }
 
@@ -38,16 +107,6 @@ class RobloxUser {
  * A value that resolves to a discord user or roblox user
  * @typedef {RobloxUser | discord.UserResolvable} UserResolvable
  */
-
- class NonOKStatus extends TypeError {
-	 constructor(response) {
-		 super('Non ok status');
-		 this.response = response;
-		 this.errno = 0;
-	 }
-	 response: any;
-	 errno: number
- }
 
 class UnkownUser extends ReferenceError {
 	constructor() {
@@ -71,57 +130,69 @@ Base client for api actions
 export class Client {
 	noblox: noblox;
 	client: discord.Client;
+	options: ClientOptions;
+	provider
 	_RateLimit: typeof Limiter;
+	providerAxios: axios.AxiosInstance
+	axios: axios.AxiosInstance;
 	/**
-	 * @param {noblox}         noblox Your noblox module object
+	 * @param {noblox}         noblox Your noblox module object, not required but kept for backwards compatibility.
 	 * @param {discord.Client} client A discord client
 	 */
-	constructor(noblox: noblox, client: discord.Client) {
+	constructor(noblox: noblox | undefined, client: discord.Client, options: ClientOptions) {
 		this.noblox = noblox;
 		this.client = client;
+		this.options = Object.assign({}, defaultClientOptions, options);
+		this.provider = providers[this.options.provider];
+
+		if (!this.provider) throw new ReferenceError('No such provider');
+
+		this.providerAxios = Axios.create({
+			baseURL: this.provider.baseURL
+		});
+
+		this.axios = Axios.create({});
+
 		this._RateLimit = new Limiter();
 	}
 	/**
 	 * @param {discord.UserResolvable} user The discord user to get robloxUser of
 	 */
-	async getRobloxUser(user: discord.UserResolvable): Promise<RobloxUser | undefined> {
-		const resolvedUser = this.client.users.resolve(user);
+	async getRobloxUser(user: discord.UserResolvable, partial: Boolean = false): Promise<RobloxUser | undefined> {
+		let userid;
+		let resolvedUser = this.client.users.resolve(user);
+
 		if (!resolvedUser) {
-			throw new UnkownUser();
-		};
-		const userid = resolvedUser.id;
-		await this._RateLimit.asyncRemoveTokens(1);
-		return axios.get(apiEndpoints.rover + userid)
-			.then((response) => {
-				const data = response.data;
-				if (data.status != 'ok') {
-					throw new NonOKStatus(response);
-				}
-				return new RobloxUser(data.robloxUsername, data.robloxId);
-			})
-			.catch(error => {
-				if (error.response.status == 404) return undefined;
-				throw error;
-			});
-	}
-	/**
-	 * get a role of a user in a group
-	 * @param  {UserResolvable}  player A roblox user or discord user
-	 * @param  {string}          group  The group to check in
-	 * @return {Promise<string>}        Promise resolving to role name
-	 */
-	async getRoleInGroup(player: UserResolvable, group: number): Promise<string> {
-		if (player instanceof RobloxUser) {
-			var user = player;
-		} else {
-			try {
-				var user = await this.getRobloxUser(player);
-			} catch (error) {
-				console.log(error);
-				throw error;
+			if (typeof user == 'string') {
+				userid = user;
+			} else {
+				throw new UnkownUser();
 			}
 		}
-		if (!user) throw new InvallidPlayer();
-		return this.noblox.getRankNameInGroup(group, user.id);
+		else {
+			userid = resolvedUser.id;
+		};
+
+		await this._RateLimit.asyncRemoveTokens(1);
+
+		return this.providerAxios.get(userid)
+			.then(async response => {
+				const data = response.data;
+				if (data && data.status != 'ok') {
+					throw response;
+				}
+				const userData = await this.provider.handleData.call(this, data, partial);
+
+				return new RobloxUser(userData, partial);
+			})
+			.catch(async err => {
+				if(err.response && err.response.status == 404) return undefined;
+
+				if (err.data) {
+					throw new Error(err.data.error);
+				}
+
+				throw err;
+			});
 	}
 }
