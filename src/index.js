@@ -100,6 +100,7 @@ class Client {
     /**
      * @param {noblox}         noblox Your noblox module object, not required but kept for backwards compatibility.
      * @param {discord.Client} client A discord client
+     * @param {ClientOptions} options Options for the client
      */
     constructor(noblox, client, options) {
         this.noblox = noblox;

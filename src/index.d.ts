@@ -1,6 +1,10 @@
 import * as axios from "axios";
 import * as discord from 'discord.js';
 declare type noblox = object | any;
+/**
+ * @typedef {Object} ClientOptions
+ * @property {String} provider
+ */
 declare type ClientOptions = {
     provider: string;
 };
@@ -28,6 +32,7 @@ export declare class Client {
     /**
      * @param {noblox}         noblox Your noblox module object, not required but kept for backwards compatibility.
      * @param {discord.Client} client A discord client
+     * @param {ClientOptions} options Options for the client
      */
     constructor(noblox: noblox | undefined, client: discord.Client, options: ClientOptions);
     /**
