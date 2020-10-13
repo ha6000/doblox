@@ -93,6 +93,11 @@ class InvallidPlayer extends TypeError {
         this.errno = 0;
     }
 }
+/**
+ * Options for the client
+ * @typedef {Object} ClientOptions
+ * @property {String} provider
+ */
 /*
 Base client for api actions
  */

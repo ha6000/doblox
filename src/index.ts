@@ -5,11 +5,6 @@ const Axios = axios.default;
 
 type noblox = object | any;
 
-/**
- * @typedef {Object} ClientOptions
- * @property {String} provider
- */
-
 type ClientOptions = {
 	provider: string
 };
@@ -129,6 +124,12 @@ class InvallidPlayer extends TypeError {
 	}
 	errno: number
 }
+
+/**
+ * Options for the client
+ * @typedef {Object} ClientOptions
+ * @property {String} provider
+ */
 
 /*
 Base client for api actions

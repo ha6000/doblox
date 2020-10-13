@@ -73,17 +73,18 @@ Whether the data is partial
 **Kind**: global class  
 
 * [Client](#Client)
-    * [new Client(noblox, client)](#new_Client_new)
+    * [new Client(noblox, client, options)](#new_Client_new)
     * [.getRobloxUser(user)](#Client+getRobloxUser)
 
 <a name="new_Client_new"></a>
 
-### new Client(noblox, client)
+### new Client(noblox, client, options)
 
 | Param | Type | Description |
 | --- | --- | --- |
 | noblox | <code>noblox</code> | Your noblox module object, not required but kept for backwards compatibility. |
 | client | <code>discord.Client</code> | A discord client |
+| options | <code>ClientOptions</code> | Options for the client |
 
 <a name="Client+getRobloxUser"></a>
 
