@@ -13,6 +13,9 @@
 <dt><a href="#UserResolvable">UserResolvable</a> : <code><a href="#RobloxUser">RobloxUser</a></code> | <code>discord.UserResolvable</code></dt>
 <dd><p>A value that resolves to a discord user or roblox user</p>
 </dd>
+<dt><a href="#ClientOptions">ClientOptions</a> : <code>Object</code></dt>
+<dd><p>Options for the client</p>
+</dd>
 </dl>
 
 <a name="RobloxUser"></a>
@@ -84,7 +87,7 @@ Whether the data is partial
 | --- | --- | --- |
 | noblox | <code>noblox</code> | Your noblox module object, not required but kept for backwards compatibility. |
 | client | <code>discord.Client</code> | A discord client |
-| options | <code>ClientOptions</code> | Options for the client |
+| options | [<code>ClientOptions</code>](#ClientOptions) | Options for the client |
 
 <a name="Client+getRobloxUser"></a>
 
@@ -101,3 +104,15 @@ Whether the data is partial
 A value that resolves to a discord user or roblox user
 
 **Kind**: global typedef  
+<a name="ClientOptions"></a>
+
+## ClientOptions : <code>Object</code>
+Options for the client
+
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type |
+| --- | --- |
+| provider | <code>String</code> | 
+
