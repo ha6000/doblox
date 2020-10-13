@@ -24,7 +24,7 @@ const user = await doblox.getRobloxUser('670588428970098708');
 ```
 
 ## Documentation
-[Wiki](https://github.com/ha6000/doblox/wiki/Docs) [Typings](https://github.com/ha6000/doblox/blob/master/src/index.d.ts)
+[Wiki](https://github.com/ha6000/doblox/wiki/Docs), [Typings](https://github.com/ha6000/doblox/blob/master/src/index.d.ts)
 
 ## License
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fha6000%2Fdoblox.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fha6000%2Fdoblox?ref=badge_large)
