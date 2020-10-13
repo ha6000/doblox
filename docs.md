@@ -19,15 +19,54 @@
 
 ## RobloxUser
 **Kind**: global class  
+
+* [RobloxUser](#RobloxUser)
+    * [new RobloxUser(data, partial)](#new_RobloxUser_new)
+    * [.username](#RobloxUser+username) : <code>String</code>
+    * [.id](#RobloxUser+id) : <code>Number</code>
+    * [.description](#RobloxUser+description) : <code>String</code>
+    * [.createdAt](#RobloxUser+createdAt) : <code>Date</code>
+    * [.partial](#RobloxUser+partial) : <code>Boolean</code>
+
 <a name="new_RobloxUser_new"></a>
 
-### new RobloxUser(username, id)
+### new RobloxUser(data, partial)
 
 | Param | Type | Description |
 | --- | --- | --- |
-| username | <code>string</code> | roblox username |
-| id | <code>string</code> |  |
+| data | <code>Object</code> | RobloxUser data |
+| partial | <code>Boolean</code> | Whether its a partial |
 
+<a name="RobloxUser+username"></a>
+
+### robloxUser.username : <code>String</code>
+Username of the user
+
+**Kind**: instance property of [<code>RobloxUser</code>](#RobloxUser)  
+<a name="RobloxUser+id"></a>
+
+### robloxUser.id : <code>Number</code>
+ID of the user
+
+**Kind**: instance property of [<code>RobloxUser</code>](#RobloxUser)  
+<a name="RobloxUser+description"></a>
+
+### robloxUser.description : <code>String</code>
+Description of the user
+
+**Kind**: instance property of [<code>RobloxUser</code>](#RobloxUser)  
+<a name="RobloxUser+createdAt"></a>
+
+### robloxUser.createdAt : <code>Date</code>
+Date at which the user was created at
+
+**Kind**: instance property of [<code>RobloxUser</code>](#RobloxUser)  
+<a name="RobloxUser+partial"></a>
+
+### robloxUser.partial : <code>Boolean</code>
+Whether the data is partial
+
+**Kind**: instance property of [<code>RobloxUser</code>](#RobloxUser)  
 <a name="Client"></a>
 
 ## Client
@@ -36,7 +75,6 @@
 * [Client](#Client)
     * [new Client(noblox, client)](#new_Client_new)
     * [.getRobloxUser(user)](#Client+getRobloxUser)
-    * [.getRoleInGroup(player, group)](#Client+getRoleInGroup) ⇒ <code>Promise.&lt;string&gt;</code>
 
 <a name="new_Client_new"></a>
 
@@ -44,7 +82,7 @@
 
 | Param | Type | Description |
 | --- | --- | --- |
-| noblox | <code>noblox</code> | Your noblox module object |
+| noblox | <code>noblox</code> | Your noblox module object, not required but kept for backwards compatibility. |
 | client | <code>discord.Client</code> | A discord client |
 
 <a name="Client+getRobloxUser"></a>
@@ -55,19 +93,6 @@
 | Param | Type | Description |
 | --- | --- | --- |
 | user | <code>discord.UserResolvable</code> | The discord user to get robloxUser of |
-
-<a name="Client+getRoleInGroup"></a>
-
-### client.getRoleInGroup(player, group) ⇒ <code>Promise.&lt;string&gt;</code>
-get a role of a user in a group
-
-**Kind**: instance method of [<code>Client</code>](#Client)  
-**Returns**: <code>Promise.&lt;string&gt;</code> - Promise resolving to role name  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| player | [<code>UserResolvable</code>](#UserResolvable) | A roblox user or discord user |
-| group | <code>string</code> | The group to check in |
 
 <a name="UserResolvable"></a>
 
