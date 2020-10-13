@@ -49,6 +49,14 @@ const providers = {
 						};
 					});
 			}
+		},
+		handleError(response) {
+			if (response.data && response.data.status == 'error') {
+				if (response.data.error == 'This user is not linked with Bloxlink.') return undefined;
+				else throw new Error(response.data.error);
+			}
+
+			throw response;
 		}
 	}
 };
@@ -193,14 +201,8 @@ export class Client {
 
 				return new RobloxUser(userData, partial);
 			})
-			.catch(async err => {
-				if(err.response && err.response.status == 404) return undefined;
-
-				if (err.data) {
-					throw new Error(err.data.error);
-				}
-
-				throw err;
+			.catch(async (err) => {
+				return this.provider.handleError.call(this, err.response || err);
 			});
 	}
 }
