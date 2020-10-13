@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Client = void 0;
 const axios = require("axios");
+const discord = require("discord.js");
 const Axios = axios.default;
 const defaultClientOptions = {
     provider: 'bloxlink'
@@ -16,14 +17,14 @@ const providers = {
         baseURL: 'https://api.blox.link/v1/user/',
         requests: 60,
         per: 60 * 1000,
-        handleData: async function (data, partial) {
+        handleData: async function (data, partial, user, options) {
             if (partial) {
                 return {
                     id: data.primaryAccount
                 };
             }
             else {
-                return this.axios.get(`https://users.roblox.com/v1/users/${data.primaryAccount}`)
+                return this.axios.get(`https://users.roblox.com/v1/users/${data.primaryAccount}${options.guild && user instanceof discord.GuildMember ? `?guild=${user.guild.id}` : ''}`)
                     .then(res => {
                     const data = res.data;
                     return {
@@ -131,8 +132,10 @@ class Client {
     }
     /**
      * @param {discord.UserResolvable} user The discord user to get robloxUser of
+     * @param {Boolean} partial Wether to return a partial
+     * @param {Object} options Options to pass to the provider
      */
-    async getRobloxUser(user, partial = false) {
+    async getRobloxUser(user, partial = false, options) {
         let userid;
         let resolvedUser = this.client.users.resolve(user);
         if (!resolvedUser) {
@@ -154,7 +157,7 @@ class Client {
             if (data && data.status != 'ok') {
                 throw response;
             }
-            const userData = await this.provider.handleData.call(this, data, partial);
+            const userData = await this.provider.handleData.call(this, data, partial, user, options);
             return new RobloxUser(userData, partial);
         })
             .catch(async (err) => {

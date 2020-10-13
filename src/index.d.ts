@@ -1,10 +1,6 @@
 import * as axios from "axios";
 import * as discord from 'discord.js';
 declare type noblox = object | any;
-/**
- * @typedef {Object} ClientOptions
- * @property {String} provider
- */
 declare type ClientOptions = {
     provider: string;
 };
@@ -21,6 +17,11 @@ declare class RobloxUser {
      */
     constructor(data: any, partial: Boolean);
 }
+/**
+ * Options for the client
+ * @typedef {Object} ClientOptions
+ * @property {String} provider
+ */
 export declare class Client {
     noblox: noblox;
     client: discord.Client;
@@ -38,6 +39,6 @@ export declare class Client {
     /**
      * @param {discord.UserResolvable} user The discord user to get robloxUser of
      */
-    getRobloxUser(user: discord.UserResolvable, partial?: Boolean): Promise<RobloxUser | undefined>;
+    getRobloxUser(user: discord.UserResolvable, partial: Boolean, options: any): Promise<RobloxUser | undefined>;
 }
 export {};

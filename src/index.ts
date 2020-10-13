@@ -30,14 +30,14 @@ const providers = {
 		baseURL: 'https://api.blox.link/v1/user/',
 		requests: 60,
 		per: 60 * 1000,
-		handleData: async function(data, partial: boolean) {
+		handleData: async function(data, partial: boolean, user, options) {
 			if (partial) {
 				return {
 					id: data.primaryAccount
 				};
 			}
 			else {
-				return this.axios.get(`https://users.roblox.com/v1/users/${data.primaryAccount}`)
+				return this.axios.get(`https://users.roblox.com/v1/users/${data.primaryAccount}${options.guild && user instanceof discord.GuildMember ? `?guild=${user.guild.id}` : ''}`)
 					.then(res => {
 						const data = res.data;
 
@@ -173,8 +173,10 @@ export class Client {
 	}
 	/**
 	 * @param {discord.UserResolvable} user The discord user to get robloxUser of
+	 * @param {Boolean} partial Wether to return a partial
+	 * @param {Object} options Options to pass to the provider
 	 */
-	async getRobloxUser(user: discord.UserResolvable, partial: Boolean = false): Promise<RobloxUser | undefined> {
+	async getRobloxUser(user: discord.UserResolvable, partial: Boolean = false, options): Promise<RobloxUser | undefined> {
 		let userid;
 		let resolvedUser = this.client.users.resolve(user);
 
@@ -197,7 +199,7 @@ export class Client {
 				if (data && data.status != 'ok') {
 					throw response;
 				}
-				const userData = await this.provider.handleData.call(this, data, partial);
+				const userData = await this.provider.handleData.call(this, data, partial, user, options);
 
 				return new RobloxUser(userData, partial);
 			})

@@ -77,7 +77,7 @@ Whether the data is partial
 
 * [Client](#Client)
     * [new Client(noblox, client, options)](#new_Client_new)
-    * [.getRobloxUser(user)](#Client+getRobloxUser)
+    * [.getRobloxUser(user, partial, options)](#Client+getRobloxUser)
 
 <a name="new_Client_new"></a>
 
@@ -91,12 +91,14 @@ Whether the data is partial
 
 <a name="Client+getRobloxUser"></a>
 
-### client.getRobloxUser(user)
+### client.getRobloxUser(user, partial, options)
 **Kind**: instance method of [<code>Client</code>](#Client)  
 
-| Param | Type | Description |
-| --- | --- | --- |
-| user | <code>discord.UserResolvable</code> | The discord user to get robloxUser of |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| user | <code>discord.UserResolvable</code> |  | The discord user to get robloxUser of |
+| partial | <code>Boolean</code> | <code>false</code> | Wether to return a partial |
+| options | <code>Object</code> |  | Options to pass to the provider |
 
 <a name="UserResolvable"></a>
 
